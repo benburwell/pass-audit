@@ -83,12 +83,12 @@ cmd_audit_usage () {
   cat <<-_EOF
 Usage:
 
-    $PROGRAM audit [--hibp,-p] [--wordlist,-w list-file] pass-name
+    $PROGRAM audit [ check ] [ --hibp ] [ --wordlist=list-file ] pass-name
         Check whether a password has been pwned, either by consulting Have I
         Been Pwned or a wordlist file (or both).  You can specify either or
         both options, but without at least one, nothing will happen.
 
-    $PROGRAM audit all [--hibp,-p] [--wordlist,-w list-file]
+    $PROGRAM audit all [ --hibp ] [ --wordlist=list-file ]
         Check all the passwords in your store against Have I Been Pwned and/or
         the provided wordlist.
 
@@ -97,9 +97,16 @@ _EOF
   exit 0
 }
 
+cmd_audit_version () {
+  echo "pass-audit v0.1.0"
+  exit 0
+}
+
 case "$1" in
+  version)        shift; cmd_audit_version "$@" ;;
   help|--help|-h) shift; cmd_audit_usage "$@" ;;
-  --all)          shift; cmd_audit_all_passwords "$@" ;;
+  all)            shift; cmd_audit_all_passwords "$@" ;;
+  check)          shift; cmd_audit_password "$@" ;;
   *)                     cmd_audit_password "$@" ;;
 esac
 

@@ -1,0 +1,166 @@
+.TH PASS-AUDIT 1 "2018 February 23" "Password store audit extension"
+
+.SH NAME
+pass-audit - A \fBpass\fP(1) extension for checking password strength.
+
+.SH SYNOPSIS
+.B pass audit
+[
+.I COMMAND
+]
+[
+.I OPTIONS
+] [
+.I ARGS
+]
+
+.SH DESCRIPTION
+
+.B pass-audit
+is an extension for
+.BR pass (1)
+to help find passwords in your store which may be vulnerable.
+.B pass-audit
+currently has two mechanisms for checking a password:
+
+.IP \[bu]
+.B Have I Been Pwned (HIBP)
+
+.B pass-audit
+can check HIBP to see whether a password is included in the large repository of
+pwned passwords. The HIBP password API has been carefully designed to prevent
+significant password data from leaving the local machine. To accomplish this,
+the password is hashed using SHA1 and a request is made to
+.BI https://api.pwnedpasswords.com/range/ RANGE
+where
+.I RANGE
+is the first 5 hexadecimal digits of the SHA1 digest.
+
+This URL returns a list of SHA1 hashes of pwned passwords beginning with
+.IR RANGE .
+.B pass-audit
+then searches locally in the hashes returned from the API for the hash of the
+password being checked. Using this technique, the only data that leaves the
+local machine is the first five digits of the SHA1 digest of each password
+being audited.
+
+.IP \[bu]
+.B Local wordlist
+
+.B pass-audit
+can check your passwords against a local wordlist. The password being checked is tested against each pattern in the specified wordlist file using
+.BR grep (1)
+with the
+.B --file
+option.
+
+If a password is found to be vulnerable, the name of the password is printed to standard output and
+.B pass-audit
+will exit with a return code of
+.BR 1 .
+This is to aid in scripting tasks, such as compiling a list of your vulnerable passwords.
+
+.SH COMMANDS
+
+.TP
+.B check
+Check a password for vulnerability. This is the default option; if no
+.B COMMAND
+is specified, then
+.B check
+will be run.
+
+.TP
+.B all
+Check all the passwords in your store for vulnerability.
+
+.TP
+.B help
+Display help about
+.BR pass-audit .
+
+.TP
+.B version
+Display the version of
+.BR pass-audit .
+
+.SH OPTIONS
+
+.TP
+.B --hibp
+Use the Have I Been Pwned service to check whether the password may be vulnerable.
+
+.TP
+.BI --wordlist= word-file
+Use the
+.I word-file
+file to check the password.
+
+.SH USAGE
+
+.TP
+\fBpass audit\fP [ \fBcheck\fP ] [ \fB--hibp\fP ] [ \fB--wordlist=\fP\fIword-file\fP ] \fIpass-name\fP
+Check whether
+.I pass-name
+is vulnerable according to HIBP, the supplied
+.IR word-file ,
+or both.
+
+.TP
+\fBpass audit all\fP [ \fB--hibp\fP ] [ \fB--wordlist=\fP\fIword-file\fP ]
+Check each password in your store to see whether it may be vulnerable according to HIBP, the supplied
+.IR word-file ,
+or both.
+
+.SH EXAMPLES
+
+.TP
+.B pass audit all --wordlist=/usr/share/wordlists/rockyou.txt
+Check all passwords in the store against the rockyou wordlist.
+
+.TP
+.B pass audit --hibp github.com
+Check your password for GitHub to see if it is included in the HIBP list using the online API.
+
+.TP
+.B pass audit check --wordlist=/usr/share/dict/words github.com
+Check your password for GitHub to see if it is a dictionary word.
+
+.SH SEE ALSO
+.BR pass (1),
+.BR grep (1),
+.BR curl (1),
+.BR shasum (1)
+
+.SH BUGS
+Issues encountered or improvements for
+.B pass-audit
+may be submitted to https://github.com/benburwell/pass-audit/issues.
+
+.SH AUTHOR
+.B pass-audit
+was written by Ben Burwell.
+
+.SH COPYING
+MIT License
+
+Copyright (c) 2018 Ben Burwell
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
